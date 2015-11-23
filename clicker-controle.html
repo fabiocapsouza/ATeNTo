@@ -4,7 +4,7 @@
 	<meta charset="ISO-8859-1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Clicker</title>
+    <title>ATeNTo - Interface de Controle</title>
    
 	<link rel="stylesheet" href="/public/css/stylesheet-controles.css">
 	
@@ -121,7 +121,8 @@
 		$("#statusSocket").text("Conectado.");
 		$("#circuloSocket").css("background-color", "green");
 	});
-	  
+	 
+	//Evento 'clicker iniciado': Sempre é desencadeado quando se conecta, ou quando o clicker é iniciado. Atualiza barra de status.
 	socket.on('clicker iniciado', function(data){
 			
 		console.log("Recebeu 'clicker iniciado'");
@@ -130,6 +131,7 @@
 			
 	});
 	
+	//Evento acknowledge de nova pergunta. Atualiza a barra de status e os status de resposta dos alunos.
 	socket.on('novaPerguntaAck', function(data){
 		//Deve-se: 
 		//	Atualizar o status da pergunta
@@ -143,6 +145,7 @@
 		
 	});
 	
+	//Evento de pergunta finalizada (acknowledge do evento enviado). Atualiza a barra de status
 	socket.on('pergunta finalizada', function(data){
 		//Deve-se: 
 		//	Atualizar o status do da pergunta
@@ -151,14 +154,11 @@
 		$("#statusPergunta").text("Pergunta finalizada.");
 		$("#circuloPergunta").css("background-color", "red");
 		
-	
-		
-		//$(".nomeAluno").css("color", "black");
 		
 	});
 	  
 	  
-	  
+	//Evento de nova conexão de aluno
 	socket.on('alunoConectado', function(msg){  //Recebida quando há conexão de um aluno e o inclui no display
 		console.log('Recebida mensagem de aluno conectado:', msg);
 		if(!$('#ra' + msg.ra).length) { //Verifica se o avatar do aluno já está sendo exibido (array com tamanho != 0 para divs com id igual ao ra do aluno). Se não estiver, exibe.
@@ -178,7 +178,7 @@
 		
 
 	  
-	  
+	//Evento de aluno desconectado
 	socket.on('alunoDesconectado', function(msg){ //Recebida quando um aluno se desconecta e o remove do replay.
 		console.log('RA ' + msg.ra + ' desconectado.');
 		$('#ra'+msg.ra+'').fadeOut(100, function(){
@@ -190,7 +190,8 @@
 
 		$("#numeroParticipantes").text(numeroPart-1);
 	});
-	  
+	 
+	//Evento de resposta de aluno. Atualiza o status da resposta do aluno correspondente.
 	socket.on('resposta aluno', function(data){
 		
 		console.log('mensagem recebida no cliente: RA' + data.ra + ' e Alternativa: ' + data.alternativa);
@@ -200,7 +201,7 @@
 
 	});
 	
-	
+	//Tratamento de mensagem de informações do clicker. Atualiza as informações da barra de status.
 	socket.on('info clicker', function(data){
 		console.log("Recebeu 'info clicker'.");
 		
@@ -239,6 +240,8 @@
 			
 	});
 	
+	//Evento de recebimento da string CSV com as respostas dos alunos. Trata como um arquivo de download.
+	//Ele cria um link para o arquivo e simula um click nesse link, recebendo-o como um download.
 	socket.on('stringCSV', function(dados){
 	
 		if(typeof dados !== "undefined") {
@@ -257,20 +260,11 @@
 		
 	});
 	
+	//Evento de mensagem arbitraria. Escreve-a no campo de mensagens.
 	socket.on('mensagem', function(data){
 		console.log("Recebeu mensagem.");
-		/*var numeroMensagens = $("#mensagens > p").length;
-		var horario = new Date();
-		var stringHorario = "(" + horario.getHours() + ":" + horario.getMinutes() + ":" + horario.getSeconds() + ")";
-
-		//Se houver mais que 5 mensagens, remove a mais antiga;
-		if(numeroMensagens > 4) {
-				$("#mensagens > p").eq(0).remove();
-		}
-		$("#mensagens").append("<p>" + stringHorario + ": " + data + "</p>");*/
 		
-		escreveMensagem(data);
-		
+		escreveMensagem(data);	
 			
 	});
 	
@@ -301,6 +295,7 @@
 		
 	});
 	
+	//Botão para emitir evento de nova pergunta
 	$("#novaPergunta").click(function(){
 		
 		socket.emit('nova pergunta'); 
@@ -308,7 +303,7 @@
 
 	});
 	
-	
+	//Botão para emitir evento de terminar pergunta.
 	$("#terminaPergunta").click(function(){
 		
 		socket.emit('termina pergunta'); 
@@ -316,18 +311,20 @@
 
 	});
 	
+	//Botão para emitir evento para alterar visibilidade do gráfico de respostas na interface compartilhada
 	$("#toggleGrafico").click(function(){
 		socket.emit('toggleGrafico');
 		console.log("Emitiu 'toggleGrafico'.");
 	});
-	  
+	 
+	//Botão para abre novo display
 	$("#novoDisplay").click(function(){
 		
 		window.open('/clicker','_blank');
 	});
 	  
 	
-	/*
+	/* Botão para debug. Não visível na interface.
 	$("#buttonStatusRespostas").click(function(){
 
 		socket.emit('status respostas');
@@ -336,7 +333,7 @@
 	});*/
 	
 
-	
+	//Botão para enviar mensagem para exportar as respostas em CSV, com a data (dia, mes, ano, hora e minutos) da hora de envio para ser usada no nome do arquivo.
 	$("#buttonSalvarExportar").click(function(){
 		var d = new Date();
 		var dataString = d.getDate() + "-" + d.getMonth() + "-" + d.getFullYear() + "_" + d.getHours() + "h" + d.getMinutes() + "m";
@@ -348,10 +345,6 @@
 	});
 	
 	  
-	  
-	$(document).ready(function(){
-		
-	});
 	</script>
   </body>
 </html>
