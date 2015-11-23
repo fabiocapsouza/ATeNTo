@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+	<meta charset="ISO-8859-1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" type="image/x-icon" href="public/favicon.ico" />
+    <title>WebClicker - Menu do Aluno</title>
+    <style>
+	* { margin: 0; padding: 0; box-sizing: border-box; }
+	
+	body { 
+		font: 14px 'Segoe UI', Tahoma, Helvetica, Arial; 
+		background-color: #EEEEEE;
+		color: #333333;
+		padding-top: 50px; 
+	}
+	
+	a {
+		background-color: #3D709B;
+		display: block;
+		width: 300px;
+		height: 40px;
+		padding: 10px;
+		margin: 5px;
+		
+		font-size: 14px;
+		font-weight: bold;
+		text-align: center;
+		color: #FFF;
+		text-decoration: none;
+	}
+	
+	a:hover {
+	
+		background-color: #286090;
+	}
+	
+	h1 {
+		font-size: 35px;
+		font-weight: 700;
+		padding-bottom: 20px;
+		text-shadow: #3D709B 0px 0px 10px;
+	}
+	
+	.user {
+		width: 150px;
+		height: 150px;
+		position: relative;
+		border: 1px solid;
+		border-color: #333333;  /*#FF3300;  Verde: 009900 */
+		box-shadow: #333333 0px 0px 3px;
+		border-radius: 10px;
+		
+		{{#if fotoUrl}}
+		
+			background: url({{{fotoUrl}}});
+			
+		{{else}}
+			
+			background: url('public/images/anonimo.jpg');
+			
+		{{/if}}
+		background-size: cover;
+		background-repeat: no-repeat;
+		margin: 5px;
+		overflow: hidden;
+	}
+	.user-info {
+		width: 150px;
+		height: 40px;
+		position: absolute;
+		bottom:110px;
+		background:	rgba(61,112,155,0.8); /*rgba(255,51,00,0.75);*/
+		color: #FFF;
+		font-weight: 700;
+		text-shadow: 0px 0px 4px #000;
+		margin: 0;
+	}
+	
+	#formContainer {
+		width: 300px;
+		display: none;
+		border: 1px solid #3D709B;
+	}
+	
+	input {
+		margin-bottom: 10px;
+
+	}
+	
+	input[type="submit"] {
+		width: 50px;
+		height: 30px;
+		background-color: #3D709B;
+		color: #EEEEEE;
+		border: 0px;
+		font-weight: bold;
+		
+	}
+	
+	
+    </style>
+	
+  </head>
+  <body>
+	<div id="container" align="center">
+		<h1>WebClicker - Menu do aluno</h1>
+		<p>Conectado como:</p>
+		<div class="user">
+			<div class="user-info">
+				<p>{{nome}}</p>
+				<p>RA{{ra}}, {{turma}}</p>
+			</div>
+		</div>
+		<br>
+		<a href="/clicker">Acessar o WebClicker</a>
+		<a id="linkFoto" href="#">Alterar foto</a>
+		<div id="formContainer">
+			<form method="post" enctype="multipart/form-data" action="/file-upload">
+			Máximo de 1MB. Formatos JPG e PNG.<br><br>
+			<input type="file" name="foto">
+			<input type="submit">
+			
+		</form>
+		
+		</div>
+		<a href="/logout">Fazer Logout</a>
+
+	</div>
+	<script src="../public/js/jquery-1.11.3.min.js"></script>
+	<script>
+		
+		$("#linkFoto").click(function(event){
+			event.preventDefault();
+			$("#formContainer").toggle(500);
+		});
+	
+	</script>
+  </body>
+</html>

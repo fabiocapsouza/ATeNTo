@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+	<meta charset="ISO-8859-1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Clicker</title>
+   
+	<link rel="stylesheet" href="/public/css/stylesheet-controles.css">
+	
+	<style>
+	
+		
+	body {
+		background-color: #245c8a;  
+		padding-top: 10px;
+	}
+	
+	
+	#clickerContainer {
+		background-color: #EEEEEE;
+		border: #333333 1px solid;
+		border-top: 0px;
+		margin: 10px 8px;
+		border-radius: 5px;
+		box-shadow: rgba(0,0,0,0.7) 0px 0px 5px;
+		
+	}
+
+	</style>
+
+  </head>
+  
+  
+  <body>
+  <div id="wrapper">
+  
+	<div id="statusContainer" style="padding-top: 5px">
+			<div class="status">
+				<div id="circuloSocket"></div><span id="statusSocket">Esperando conexão com o servidor.</span>
+			</div>
+			<div class="status">
+				<div id="circuloClicker"></div><span id="statusClicker">Sessão não iniciada.</span>
+			</div>
+			<div class="status">
+				<div id="circuloPergunta"></div><span id="statusPergunta">Sem pergunta.</span>
+			</div>
+		</div>
+	<div id="leftContainer">
+
+		<div id="divParticipantes">
+			<p class="titulo">Participantes (<span id="numeroParticipantes">0</span>)</p><br>
+		
+		</div>
+		
+		
+		
+		
+	</div>
+	<div id="rightContainer" align="center">
+
+		
+		
+		
+		<div id="canvasContainer">
+			<p>Distribuição das respostas:</p>
+			<canvas id="graficoCanvas" width="400" height="440">Your browser does not support the HTML5 canvas tag.</canvas>
+
+		</div>
+		
+		
+		
+		<div id="divControles" align="left">
+			<p class="titulo">Controles</p>
+			<br>
+			<button id="iniciaClicker">Iniciar sessão do Clicker</button>
+			<button id="novaPergunta">Começar nova<br>pergunta</button>
+			<button id="terminaPergunta">Terminar recebimento<br>de respostas</button>
+			
+		</div>
+		
+		<div id="divInterfaces" align="left">
+			<p class="titulo">Interfaces</p>
+			<br>
+			<button id="toggleGrafico">Mostrar/Esconder gráfico no Display</button>
+			<button id="novoDisplay">Abrir nova interface<br>Display</button>
+			<button id="buttonSalvarExportar">Salvar respostas<br>(arquivo CSV)</button>
+		</div>
+		
+		<div id="divMensagens" align="left">
+			<p class="titulo">Mensagens</p>
+			<br>
+			<div id="mensagens">
+			
+			</div>
+
+		</div>
+		
+	</div>
+	
+
+  </div>
+	
+	
+	
+	<script src="/socket.io/socket.io.js"></script>
+	<!--<script src="http://code.jquery.com/jquery-1.11.1.js"></script>-->
+	<script src="../public/js/jquery-1.11.3.min.js"></script>
+	<script>
+	
+	
+	
+	//Descrições dos callbacks para os eventos do Socket.IO:
+	
+	var socket = io();
+	  
+	socket.on('connect', function(msg){
+		socket.emit('checaAlunosOnline'); //Mensagem para checar se já há alunos conectados. Respostas recebidas como "alunoConectado".
+		console.log("Conetado ao socket.io.");
+
+		$("#statusSocket").text("Conectado.");
+		$("#circuloSocket").css("background-color", "green");
+	});
+	  
+	socket.on('clicker iniciado', function(data){
+			
+		console.log("Recebeu 'clicker iniciado'");
+		$("#statusClicker").text("Sessão iniciada.");
+		$("#circuloClicker").css("background-color", "yellow");
+			
+	});
+	
+	socket.on('novaPerguntaAck', function(data){
+		//Deve-se: 
+		//	Atualizar o status da pergunta
+		//	Atualizar coloração dos nomes dos alunos
+		
+		console.log("Recebeu 'nova pergunta ack'");
+		$("#statusPergunta").text("Pergunta ativa.");
+		$("#circuloPergunta").css("background-color", "blue");		
+		
+		$(".nomeAluno").css("color", "black");
+		
+	});
+	
+	socket.on('pergunta finalizada', function(data){
+		//Deve-se: 
+		//	Atualizar o status do da pergunta
+		
+		console.log("Recebeu 'pergunta finalizada'");
+		$("#statusPergunta").text("Pergunta finalizada.");
+		$("#circuloPergunta").css("background-color", "red");
+		
+	
+		
+		//$(".nomeAluno").css("color", "black");
+		
+	});
+	  
+	  
+	  
+	socket.on('alunoConectado', function(msg){  //Recebida quando há conexão de um aluno e o inclui no display
+		console.log('Recebida mensagem de aluno conectado:', msg);
+		if(!$('#ra' + msg.ra).length) { //Verifica se o avatar do aluno já está sendo exibido (array com tamanho != 0 para divs com id igual ao ra do aluno). Se não estiver, exibe.
+			$('<span class="nomeAluno" id="ra' + msg.ra + '">' + msg.nome.split(" ")[0] + ' (' + msg.ra + ') </span>').appendTo("#divParticipantes").hide().fadeIn(700);
+		
+			 //Atualiza o contador de participantes
+			var numeroPart = $("#numeroParticipantes").text();
+			numeroPart = parseInt(numeroPart, 10);
+			$("#numeroParticipantes").text(numeroPart + 1);
+			
+			 //Coloca a cor correspondente (azul se já respondeu, senão mantém preto)
+			if(msg.jaRespondeu) {
+				$("#ra" + msg.ra).css("color", "blue");
+			}
+		}
+	  });
+		
+
+	  
+	  
+	socket.on('alunoDesconectado', function(msg){ //Recebida quando um aluno se desconecta e o remove do replay.
+		console.log('RA ' + msg.ra + ' desconectado.');
+		$('#ra'+msg.ra+'').fadeOut(100, function(){
+			this.remove();
+		});
+		
+		var numeroPart = $("#numeroParticipantes").text();
+		numeroPart = parseInt(numeroPart, 10);
+
+		$("#numeroParticipantes").text(numeroPart-1);
+	});
+	  
+	socket.on('resposta aluno', function(data){
+		
+		console.log('mensagem recebida no cliente: RA' + data.ra + ' e Alternativa: ' + data.alternativa);
+		
+		$("#ra" + data.ra).css("color", "blue");
+		
+
+	});
+	
+	
+	socket.on('info clicker', function(data){
+		console.log("Recebeu 'info clicker'.");
+		
+		//'clicker iniciado': clickerIniciado, 'aceitando respostas': aceitandoRespostas, 'pergunta ativa': perguntaAtiva}
+		
+		if(data["clicker iniciado"]) {
+		
+		
+			if(data["pergunta ativa"]){ //se já começaram as perguntas, "pergunta ativa" > 0
+				
+				if(data["aceitando respostas"]){ //Mostrar [azul] Pergunta ativa.
+				
+					$("#statusPergunta").text("Pergunta ativa.");
+					$("#circuloPergunta").css("background-color", "blue");
+					
+					escreveMensagem("Pergunta " + data["pergunta ativa"] + " ativa.")
+				
+				} else { //Mostrar [vermelho] Pergunta finalizada.
+				
+					$("#statusPergunta").text("Pergunta finalizada.");
+					$("#circuloPergunta").css("background-color", "red");
+					
+					escreveMensagem("Pergunta " + data["pergunta ativa"] + " finalizada.")
+				
+				}
+			
+			} else { //não começaram as perguntas
+				//Mostrar "[preto] Sem pergunta."
+				$("#statusPergunta").text("Sem pergunta.");
+				$("#circuloPergunta").css("background-color", "black");
+			
+			}
+		
+		}
+		
+			
+	});
+	
+	socket.on('stringCSV', function(dados){
+	
+		if(typeof dados !== "undefined") {
+			
+			var downloadLink = document.createElement("a");
+			var blob = new Blob(["\ufeff", dados.CSV]);
+			var url = URL.createObjectURL(blob);
+			downloadLink.href = url;
+			downloadLink.download = dados.nome + ".csv";
+
+			document.body.appendChild(downloadLink);
+			downloadLink.click();
+			document.body.removeChild(downloadLink);
+			}
+			
+		
+	});
+	
+	socket.on('mensagem', function(data){
+		console.log("Recebeu mensagem.");
+		/*var numeroMensagens = $("#mensagens > p").length;
+		var horario = new Date();
+		var stringHorario = "(" + horario.getHours() + ":" + horario.getMinutes() + ":" + horario.getSeconds() + ")";
+
+		//Se houver mais que 5 mensagens, remove a mais antiga;
+		if(numeroMensagens > 4) {
+				$("#mensagens > p").eq(0).remove();
+		}
+		$("#mensagens").append("<p>" + stringHorario + ": " + data + "</p>");*/
+		
+		escreveMensagem(data);
+		
+			
+	});
+	
+	function escreveMensagem (conteudo) {
+		
+		//Verifica numero de mensagens sendo exibidas
+		var numeroMensagens = $("#mensagens > p").length;
+		
+		//Formata o horário atual no formato (hh:mm:ss)
+		var horario = new Date();
+		var stringHorario = "(" + horario.getHours() + ":" + horario.getMinutes() + ":" + horario.getSeconds() + ")";
+
+		//Se houver mais que 5 mensagens, remove a mais antiga;
+		if(numeroMensagens > 4) {
+				$("#mensagens > p").eq(0).remove();
+		}
+		//Coloca a nova mensagem
+		$("#mensagens").append("<p>" + stringHorario + ": " + conteudo + "</p>");
+	
+	}
+	
+	//Botões: 
+	
+	$("#iniciaClicker").click(function(){
+	
+		socket.emit('iniciaClicker');
+		console.log("Emitiu iniciaClicker.");
+		
+	});
+	
+	$("#novaPergunta").click(function(){
+		
+		socket.emit('nova pergunta'); 
+		console.log("Emitiu 'nova pergunta'");
+
+	});
+	
+	
+	$("#terminaPergunta").click(function(){
+		
+		socket.emit('termina pergunta'); 
+		console.log("Emitiu 'termina pergunta'.");
+
+	});
+	
+	$("#toggleGrafico").click(function(){
+		socket.emit('toggleGrafico');
+		console.log("Emitiu 'toggleGrafico'.");
+	});
+	  
+	$("#novoDisplay").click(function(){
+		
+		window.open('/clicker','_blank');
+	});
+	  
+	
+	/*
+	$("#buttonStatusRespostas").click(function(){
+
+		socket.emit('status respostas');
+		console.log("Emitiu 'status respostas");
+
+	});*/
+	
+
+	
+	$("#buttonSalvarExportar").click(function(){
+		var d = new Date();
+		var dataString = d.getDate() + "-" + d.getMonth() + "-" + d.getFullYear() + "_" + d.getHours() + "h" + d.getMinutes() + "m";
+		
+		socket.emit('salvar e exportar', {"date": dataString});
+		console.log("Emitiu 'salvar e exportar'");
+
+		
+	});
+	
+	  
+	  
+	$(document).ready(function(){
+		
+	});
+	</script>
+  </body>
+</html>

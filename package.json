@@ -1,0 +1,16 @@
+{
+  "name": "socket-clicker",
+  "version": "0.0.1",
+  "description": "clicker app",
+  "dependencies": {
+    "connect-redis": "^2.5.1",
+    "cookie-parser": "^1.4.0",
+    "express": "^4.10.2",
+    "express-session": "^1.11.3",
+    "handlebars": "^4.0.3",
+    "multer": "^1.0.5",
+    "mysql": "^2.9.0",
+    "serve-favicon": "^2.3.0",
+    "socket.io": "^1.3.6"
+  }
+}

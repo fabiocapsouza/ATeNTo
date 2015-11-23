@@ -1,0 +1,117 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body { 
+	font: 14px 'Segoe UI', Helvetica, Arial; 
+	background-color: #EEEEEE;
+	color: #333333;
+	padding-top: 30px; 
+}
+
+.multichoice { 
+	width: 100px; 
+	height: 100px; 
+	margin: 5px;
+	border-radius: 50px; 
+	border: 1px #2B4E6C solid;
+	background-color: #3D709B;  /* #4791FF; */
+	font-size: 50px;
+	font-weight: 700;
+	color: #f7f7f7; 
+	transition: background-color 0.2s;
+	box-shadow: rgba(0,0,0,0.7) 0px 0px 10px;
+}
+
+.multichoice:hover {
+	background-color: #286090;  /*#4082E6;*/
+}
+
+.multichoice:active {
+	background-color: #245682  /* #3A75CF; */
+}
+
+
+#buttonsContainer {
+	display: none;
+}
+
+#wrap-users {
+	margin: 0px 20px; 
+	/*height: 100vh;*/
+	float: left;
+	background-color: #EEEEEE;
+	width: 552px;
+	/*padding: 10px; */
+	border: 1px solid black;
+	overflow: auto;
+}
+
+.user {
+	width: 100px;
+	height: 100px;
+	float: left;
+	position: relative;
+	border: 1px solid;
+	border-color: #333333;  /*#FF3300;  Verde: 009900 */
+	box-shadow: #333333 0px 0px 3px;
+	border-radius: 10px;
+	/*background-image: url(/public/fotos/einstein.jpg); /*Verde: #66C266*/
+	
+	background: url(/public/fotos/einstein.jpg);
+    background-size: cover;
+    background-repeat: no-repeat;
+	margin: 5px;
+	overflow: hidden;
+}
+
+.user-status {
+	width: 100px;
+	height: 40px;
+	position: absolute;
+	bottom:0;
+	background: rgba(150,150,150,0.75); /*rgba(255,51,00,0.75);*/
+	color: #FFF;
+	font-weight: 700;
+	text-shadow: 0px 0px 4px #000;
+	margin: 0;
+}
+
+@media screen and (max-width: 592px) {
+	
+	#wrap-users {
+		background-color: #FFFF00;
+		margin: auto;
+		float: none;
+	}
+	
+}
+
+
+
+.connected {
+	background: rgba(92,230,46,0.6);/**/ 
+	border-color: #5CE62E; /* Verde: 009900 */
+}
+
+
+#socketStatus {
+	display: inline-block;
+	margin: 0px 5px 30px 10px;
+}
+
+.green {
+	color: green;
+}
+
+.red {
+	color: red;
+}
+
+#circulo {
+	width: 10px;
+	height: 10px;
+	border-radius: 5px;
+	background-color: black;
+	display: inline-block;
+	transition: all 0.5s;
+
+}

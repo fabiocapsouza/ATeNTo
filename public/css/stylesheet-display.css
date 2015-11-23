@@ -1,0 +1,285 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body { 
+	font: 14px 'Segoe UI', Helvetica, Arial; 
+	background-color: #EEEEEE;
+	color: #333333;
+	padding-top: 0; 
+}
+
+#wrapper {
+	width: 890px;
+	padding: 0;
+	margin: auto;  
+	box-shadow: rgba(0,0,0,0.7) 0px 0px 5px;
+	border-radius: 5px;
+	background-color: #EEEEEE;
+}
+
+#leftContainer {
+	/*width: 900px;*/
+	/*background-color: pink;*/
+	overflow: auto;
+	margin: 0px;
+	padding: 0px;
+	/*border-radius: 5px 5px 0px 0px;*/
+}
+
+#rightContainer {
+	/*width: 890px;*/
+	min-height: 80vh;
+	padding-top: 10px;
+	background-color: #EEEEEE;
+	overflow: auto;
+	margin: 0px auto;
+	border: 0px;
+	
+}
+
+#statusContainer {
+	background-color: #444444;
+	background: linear-gradient(to bottom, #62656d 0%,#45484d 100%);
+	border: 0px;
+	margin: 0px;
+	padding-bottom: 5px;
+	border-radius: 5px 5px 0px 0px;
+	border-bottom: 0px;
+	color: #FFFFFF;
+	text-align: center;
+}
+	
+#wrap-users {
+	
+	min-height: 116px;
+	margin: 0px; 
+	padding-left: 5px;
+	padding-top: 4px;
+	padding-bottom: 5px;
+	border-bottom: 1px dashed gray;
+	overflow: auto;
+	background-color: #EEEEEE;
+	
+}
+
+@media screen and (min-width: 940px) {
+	
+	#wrapper {
+		width: 890px;
+	}
+}
+
+@media screen and (min-width: 1050px) {
+	
+	#wrapper {
+		width: 1000px;
+	}
+}
+
+@media screen and (min-width: 1160px) {
+	
+	#wrapper {
+		width: 1110px;
+	}
+}
+
+@media screen and (min-width: 1350px) {
+	
+	#wrapper {
+		width: 1300px;
+		background-color: #EEEEEE;
+	}
+	
+	#leftContainer {
+		width: 890px;
+		float: left;
+
+	}
+	
+	#wrap-users {
+		border-bottom: 0px;
+	}
+	#rightContainer {
+		border-left: 1px dashed gray;
+		
+	}
+}
+
+
+.user {
+	width: 100px;
+	height: 100px;
+	float: left;
+	position: relative;
+	border: 1px solid;
+	border-color: #333333; 
+	box-shadow: #333333 0px 0px 3px;
+	border-radius: 10px;
+    background-size: cover;
+    background-repeat: no-repeat;
+	margin: 5px;
+	overflow: hidden;
+}
+
+.user-info {
+	/*width: 100px;*/
+	height: 20px;
+	/*position: absolute;*/
+	text-align: center;
+	bottom:80px;
+	background:	rgba(61,112,155,0.8); /*rgba(255,51,00,0.75);*/
+	color: #FFF;
+	font-weight: 700;
+	text-shadow: 0px 0px 4px #000;
+	margin: 0;
+}
+
+.circuloStatus {
+	width: 14px;
+	height: 14px;
+	position: absolute;
+	bottom: 0px;
+	
+	border-radius: 8px;
+	background-color: green;
+	display: inline-block;
+	transition: all 0.5s;
+	/*box-shadow: rgba(255,255,255,0.7) 0px 0px 5px;*/
+	border: 1px solid rgba(0,0,0,0.7);
+	margin:	5px;
+}
+
+.titulo {
+	margin-top: 5px;
+	font-weight: bold;
+	font-size: 25px; 
+	
+}
+
+#canvasContainer {
+
+	display: none;
+}
+
+
+canvas {
+	
+	padding: 0;
+	margin: auto;
+	display: block;
+	width: 400px;
+	height: 440px;
+	background-color: #EEEEEE;
+	
+}
+
+.status {
+	display: inline-block;
+	margin-right: 15px;
+	
+}
+#statusSocket {
+	display: inline-block;
+	margin: 0px 5px 5px 10px;
+	color: #EEEEEE;
+	font-weight: 600;
+}
+
+#circuloSocket {
+	width: 10px;
+	height: 10px;
+	border-radius: 5px;
+	background-color: black;
+	display: inline-block;
+	transition: all 0.5s;
+}
+
+
+#statusClicker {
+	display: inline-block;
+	margin: 0px 5px 5px 10px;
+	color: #EEEEEE;
+	font-weight: 600;
+}
+
+
+#circuloClicker {
+	width: 10px;
+	height: 10px;
+	border-radius: 5px;
+	background-color: black;
+	display: inline-block;
+	transition: all 0.5s;
+}
+
+#statusPergunta {
+	display: inline-block;
+	margin: 0px 5px 5px 10px;
+	color: #EEEEEE;
+	font-weight: 600;
+}
+
+
+#circuloPergunta {
+	width: 10px;
+	height: 10px;
+	border-radius: 5px;
+	background-color: black;
+	display: inline-block;
+	transition: all 0.5s;
+}
+
+button {
+	
+	width: 150px;
+	height: 80px;
+	display: inline-block;
+	background: #eeeeee; /* Old browsers */
+	background: -moz-linear-gradient(top, #eeeeee 0%, #b4b7ba 100%); /* FF3.6-15 */
+	background: -webkit-linear-gradient(top, #eeeeee 0%,#b4b7ba 100%); /* Chrome10-25,Safari5.1-6 */
+	background: linear-gradient(to bottom, #eeeeee 0%,#b4b7ba 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+	border: 1px solid #676F75;
+	border-radius: 5px;
+	font-weight: 600;
+	padding: 5px;
+	margin-right: 15px;
+	margin-bottom: 15px;
+	vertical-align: middle;
+	box-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+	
+}
+
+#divControles {
+	padding: 10px 15px;
+	
+}
+
+#divInterfaces{
+	padding: 10px 15px;
+	
+}
+
+#divParticipantes{
+	padding: 10px 15px;
+	
+}
+
+.nomeAluno{
+	
+	display: inline-block;
+	padding-left: 15px;
+	padding-right: 5px;
+	padding-bottom: 5px;
+	font-weight: bold;
+	
+}
+
+#divMensagens{
+	padding: 10px 15px;
+	
+}
+
+#mensagens {
+	height: 200px;
+	overflow: scroll;
+}
+

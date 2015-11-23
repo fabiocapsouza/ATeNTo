@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+	<meta charset="ISO-8859-1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Clicker - Login Administrativo</title>
+    <style>
+		* { margin: 0; padding: 0; box-sizing: border-box; }
+		body { 
+			font: 14px 'Segoe UI', Helvetica, Arial; 
+			background-color: #EEEEEE;
+			color: #333333;
+			padding-top: 50px; 
+		}
+		
+		input {
+			width: 300px;
+			padding: 10px;
+			margin-top: -1px;
+			font-size: 16px;
+			font-family: 'Segoe UI';
+		}
+		
+		input[type="submit"] {
+			background-color: #3D709B;
+			color: #FFFFFF;
+			font-size: 18px;
+			border: 1px solid #286090;
+			font-weight: 700;
+		}
+		
+		input[type="submit"]:hover {
+			background-color: #286090;
+		}
+		
+		input:last-of-type {
+			margin: 10px 0px;
+		}
+		
+		h1 {
+			margin-bottom: 20px;
+		}
+    </style>
+  </head>
+  <body>
+	<div id="wrapper" align="center">
+		
+		<h1>Login administrativo</h1>
+		<form id="loginForm" method="post" enctype="multipart/form-data" action="/login_admin" onsubmit="return validaDados()">
+			<input type="text" name="username" placeholder="Usuário" required autofocus><br>
+			<input type="password" name="password" placeholder="Senha" required><br>
+			<input id="button" type="submit"><br>
+		</form>
+		
+
+	</div>
+
+	<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+  </body>
+</html>

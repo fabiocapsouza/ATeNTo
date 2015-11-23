@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+	<meta charset="ISO-8859-1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Clicker</title>
+   
+	<link rel="stylesheet" href="/public/css/stylesheet-display.css">
+	
+	<style>
+	
+		
+	body {
+		background-color: #245c8a;  
+		padding-top: 10px;
+	}
+	
+	
+	#clickerContainer {
+		background-color: #EEEEEE;
+		border: #333333 1px solid;
+		border-top: 0px;
+		margin: 10px 8px;
+		border-radius: 5px;
+		box-shadow: rgba(0,0,0,0.7) 0px 0px 5px;
+		
+	}
+
+	
+	
+	</style>
+
+  </head>
+  
+  
+  <body>
+  <div id="wrapper">
+  
+	<div id="statusContainer" style="padding-top: 5px">
+			<div class="status">
+				<div id="circuloSocket"></div><span id="statusSocket">Esperando conexão com o servidor.</span>
+			</div>
+			<div class="status">
+				<div id="circuloClicker"></div><span id="statusClicker">Aguardando início da sessão.</span>
+			</div>
+			<div class="status">
+				<div id="circuloPergunta"></div><span id="statusPergunta">Sem pergunta.</span>
+			</div>
+		</div>
+	<div id="leftContainer">
+
+		<div id="wrap-users">
+			<p class="titulo" style="margin-bottom: 10px; margin-left: 10px;">Participantes</p>
+		</div>
+		
+	</div>
+	<div id="rightContainer" align="center">
+
+		
+		
+		
+		
+		<div id="canvasContainer">
+			<p class="titulo">Distribuição das respostas:</p>
+			<canvas id="graficoCanvas" width="400" height="440">Your browser does not support the HTML5 canvas tag.</canvas>
+
+		</div>
+		
+		<button id="toggle">Mostrar/Esconder gráfico</button>
+		
+		
+		<div id="botoesContainer">
+			<button id="testeB">Adicionar usuário teste</button>
+			<button id="aumentar">Aumentar</button>
+			<button id="diminuir">Diminuir</button>
+			<!--
+			<button id="iniciaClicker">Iniciar sessão do Clicker</button>
+			<button id="novaPergunta">Iniciar nova pergunta</button><br>
+			<button id="buttonStatusRespostas">Status respostas e perguntas</button>
+			<button id="buttonSalvarExportar">Salvar e exportar</button>
+			-->
+		</div>
+		<!--  -->
+	</div>
+	
+
+  </div>
+	
+	
+	
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="../public/js/jquery-1.11.3.min.js"></script>
+	<script>
+	
+		var respostas = []; //Objeto que armazena as respostas
+		var numeroRespostas = 0;
+		var contagem = {};
+		var id_pergunta = 1;
+		
+		var colors = ["#3366CC", "#DC3912", "#FF9900", "#109618", "#990099"]; //Cores para o gráfico pizza
+		
+		respostas[0]={};
+		
+		//Elementos que conterão a quantidade de respostas em cada alternativa
+		contagem['a'] = 0;
+		contagem['b'] = 0;
+		contagem['c'] = 0;
+		contagem['d'] = 0;
+		contagem['e'] = 0;
+		
+		//Função para calcular a distribuição das respostas e atualizar o gráfico Pizza
+		function calcula() {
+			var i = 0;
+			contagem['a'] = 0;
+			contagem['b'] = 0;
+			contagem['c'] = 0;
+			contagem['d'] = 0;
+			contagem['e'] = 0;
+			var porcentagem = 0; 
+			
+			
+			for(i=0; i<numeroRespostas; i++){
+				contagem[respostas[i]]++;
+			}
+			
+			//Seleciona o canvas do gráfico e os métodos (contexto) para desenho 2D
+			var grafico = document.getElementById("graficoCanvas"); 
+			var contexto = grafico.getContext("2d"); 
+			
+			var j=0;
+			var totalAnterior = 0;
+			
+			//Limpa o canvas (exceto legenda)
+			contexto.clearRect(0, 0, grafico.width, grafico.height-40); 
+			
+			//Calcula o centro em X e Y e o raio como 90% das dimensões
+			var centerX = Math.floor(grafico.width / 2);
+			var centerY = Math.floor((grafico.height-40)/ 2); //40 pixels de baixo reservados para legenda
+			var radius = Math.floor(0.9*grafico.width/ 2);
+			
+			//Desenha um círculo preto (borda do gráfico)
+			contexto.beginPath();
+			contexto.moveTo(centerX, centerY);
+			contexto.arc(centerX, centerY, radius+1, 0, 2*Math.PI, false);
+			contexto.closePath();
+			contexto.fillStyle = "black";
+			contexto.fill();
+			
+			limpaGraficoPizza(grafico, contexto, centerX, centerY, radius);
+			
+			//Desenha os 5 setores do gráfico pizza
+			for(var x in contagem) {  //Varre o array de contagem de respostas, que possui 5 elementos identificados pelas chaves 'a','b','c','d' e 'e'
+				
+				porcentagem = contagem[x]/numeroRespostas; //Calcula as razões de cada alternativa
+				
+				desenhaArco(grafico, contexto, porcentagem, totalAnterior, j); //Desenha o arco correspondente
+				totalAnterior += porcentagem; //Atualiza o total já desenhado (base para o ângulo de ínicio do arco)
+				j++;
+				
+			}
+			//$("#total").text(numeroRespostas);
+		}
+		
+		function desenhaRetangulo(canvas, contexto, porcentagem, i){
+		
+			var xInicial = 20+60*i;
+			var yInicial = 20+(1-porcentagem)*(canvas.height-20);
+			var altura = porcentagem * (canvas.height-20);
+			console.log("Entrou no desenhaRetangulo.");
+			contexto.save();
+			contexto.beginPath();
+			contexto.rect(xInicial, yInicial, 40, altura);
+			contexto.fillStyle = colors[i];
+			contexto.fill();
+			
+			contexto.closePath();
+			contexto.restore();
+		
+		}
+		
+		function desenhaArco(canvas, contexto, porcentagem, totalAnterior, i){
+		
+			contexto.save();
+			var centerX = Math.floor(canvas.width / 2);
+			var centerY = Math.floor((canvas.height -40)/ 2);
+			var radius = Math.floor(0.9*canvas.width / 2);
+
+			var startingAngle = totalAnterior*2*Math.PI; //Ângulo de início do arco em relação ao ângulo 0
+			var arcSize = porcentagem*2*Math.PI; //"Comprimento do arco"
+			var endingAngle = startingAngle + arcSize; //Cálculo do ângulo final
+
+			contexto.beginPath();
+			contexto.moveTo(centerX, centerY);
+			contexto.arc(centerX, centerY, radius, startingAngle, endingAngle, false);
+			contexto.closePath();
+
+			contexto.fillStyle = colors[i];
+			contexto.fill();
+
+			contexto.restore();
+		
+		}
+		
+		function desenhaLegenda(canvas, contexto, i, letra){
+			
+			contexto.save();
+			contexto.font="20px Verdana";
+			
+			contexto.beginPath();
+			contexto.rect(29+80*i, 409, 22, 22);
+			contexto.fillStyle = "black";
+			contexto.fill();
+			contexto.closePath();
+			
+			contexto.fillText(letra,55+80*i,427);
+			
+			contexto.beginPath();
+			contexto.rect(30+80*i, 410, 20, 20);
+			contexto.fillStyle = colors[i];
+			contexto.fill();
+			contexto.closePath();
+			
+			
+			contexto.restore();
+			
+		}
+		
+		function limpaGraficoPizza(canvas, contexto, centerX, centerY, radius) {
+		
+			//Desenha um círculo cinza (sem informações)
+			contexto.beginPath();
+			contexto.moveTo(centerX, centerY);
+			contexto.arc(centerX, centerY, radius, 0, 2*Math.PI, false);
+			contexto.closePath();
+			contexto.fillStyle = "#EEEEEE";
+			contexto.fill();
+		
+		}
+		
+
+	  var socket = io();
+	  
+	  socket.on('connect', function(msg){
+		socket.emit('checaAlunosOnline'); //Mensagem para checar se já há alunos conectados. Respostas recebidas como "alunoConectado".
+		console.log("Conetado ao socket.io.");
+		
+		$("#statusSocket").text("Conectado.");
+		$("#circuloSocket").css("background-color", "green");
+	  });
+	  
+	  
+	//Evento 'clicker iniciado': Sempre é desencadeado quando se conecta, ou quando o clicker é iniciado
+	socket.on('clicker iniciado', function(data){
+			
+		console.log("Recebeu 'clicker iniciado'");
+		$("#statusClicker").text("Sessão iniciada.");
+		$("#circuloClicker").css("background-color", "yellow");
+			
+	});
+	
+
+	socket.on('novaPerguntaAck', function(data){
+		//Deve-se: 
+		//	Atualizar o status do clicker
+		//	Atualizar os circulos dos alunos
+		//	Limpar o gráfico
+		//  Zerar a contagem de respostas
+		
+		numeroRespostas = 0;
+		respostas = [];
+		
+		console.log("Recebeu 'nova pergunta ack'");
+		$("#statusPergunta").text("Pergunta ativa.");
+		$("#circuloPergunta").css("background-color", "blue");
+		
+		$(".circuloStatus").css("background-color", "yellow");
+		
+		var grafico = document.getElementById("graficoCanvas");
+		var ctx = grafico.getContext("2d");
+		
+		//Calcula o centro em X e Y e o raio como 90% das dimensões
+		var centerX = Math.floor(grafico.width / 2);
+		var centerY = Math.floor((grafico.height-40)/ 2); //Reserva 40 pixels de baixo para legenda
+		var radius = Math.floor(0.9*grafico.width/ 2);
+
+		limpaGraficoPizza(grafico, ctx, centerX, centerY, radius);
+		
+	});
+	
+	socket.on('pergunta finalizada', function(data){
+		//Deve-se: 
+		//	Atualizar o status do clicker
+		//	Atualizar os circulos dos alunos
+		//	Limpar o gráfico
+		//  Zerar a contagem de respostas
+		
+		console.log("Recebeu 'pergunta finalizada'");
+		$("#statusPergunta").text("Pergunta finalizada.");
+		$("#circuloPergunta").css("background-color", "red");
+		
+	});
+	  
+	  
+	  
+	  socket.on('alunoConectado', function(msg){  //Recebida quando há conexão de um aluno e o inclui no display
+		console.log('Recebida mensagem de aluno conectado:', msg);
+		if(!$('#ra' + msg.ra).length) //Verifica se o avatar do aluno já está sendo exibido (array com tamanho != 0 para divs com id igual ao ra do aluno). Se não estiver, exibe.
+			$('<div class="user" id="ra' + msg.ra + '" style="background: url(' + msg.fotoUrl + '); background-size: cover;"><div class="circuloStatus"></div><div class="user-info"><p>' + (msg.nome.split(" "))[0] + '</p></div></div>').appendTo("#wrap-users").hide().fadeIn(700);
+		
+		var widthAtual = $(".user").outerWidth();
+		$("#ra" + msg.ra).outerWidth(widthAtual).outerHeight(widthAtual);
+
+		if(msg.jaRespondeu) {
+			$("#ra" + msg.ra + " > .circuloStatus").css("background-color", "blue");
+		} else {
+			$("#ra" + msg.ra + " > .circuloStatus").css("background-color", "yellow");
+		}
+	  });
+	  
+	  socket.on('alunoDesconectado', function(msg){ //Recebida quando um aluno se desconecta e o remove do replay.
+		console.log('RA ' + msg.ra + ' desconectado.');
+		$('#ra'+msg.ra+'').fadeOut(100, function(){
+			this.remove();
+		});
+	  });
+	  
+	socket.on('resposta aluno', function(data){
+		numeroRespostas += 1;
+		if(data.alternativa)
+			respostas[numeroRespostas-1]= data.alternativa;
+
+		console.log('mensagem recebida no cliente: RA' + data.ra + ' e Alternativa: ' + data.alternativa);
+		
+		$("#ra" + data.ra + " > .circuloStatus").css("background-color", "blue");
+		
+		console.log('Numero de respostas:' + numeroRespostas);
+
+		window["calcula"]();
+
+	});
+	
+	socket.on('info clicker', function(data){
+		console.log("Recebeu 'info clicker'.");
+		
+		//'clicker iniciado': clickerIniciado, 'aceitando respostas': aceitandoRespostas, 'pergunta ativa': perguntaAtiva}
+		
+		if(data["clicker iniciado"]) {
+		
+		
+		
+			if(data["pergunta ativa"]){ //se já começaram as perguntas, "pergunta ativa" > 0
+				
+				if(data["aceitando respostas"]){ //Mostrar [azul] Pergunta ativa.
+				
+					$("#statusPergunta").text("Pergunta ativa.");
+					$("#circuloPergunta").css("background-color", "blue");
+				
+				} else { //Mostrar [vermelho] Pergunta finalizada.
+				
+					$("#statusPergunta").text("Pergunta finalizada.");
+					$("#circuloPergunta").css("background-color", "red");
+				
+				}
+			
+			} else { //não começaram as perguntas
+				//Mostrar "[preto] Sem pergunta."
+				$("#statusPergunta").text("Sem pergunta.");
+				$("#circuloPergunta").css("background-color", "black");
+			
+			}
+		
+		}
+		
+			
+	});
+	
+	socket.on('toggleGrafico', function(data){
+	
+		console.log("Recebeu 'toggleGrafico'.");
+		$("#canvasContainer").toggle(700);
+		
+			
+	});
+	
+	socket.on('stringCSV', function(dados){
+	
+		if(typeof dados !== "undefined") {
+			
+			var downloadLink = document.createElement("a");
+			var blob = new Blob(["\ufeff", dados.CSV]);
+			var url = URL.createObjectURL(blob);
+			downloadLink.href = url;
+			downloadLink.download = dados.nome + ".csv";
+
+			document.body.appendChild(downloadLink);
+			downloadLink.click();
+			document.body.removeChild(downloadLink);
+		}
+			
+		
+	});
+	
+	
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  $("#testeB").click(function(){
+	  
+			$('<div class="user" id="ra"><div class="user-status"></div></div>').appendTo("#wrap-users").hide().fadeIn(700);
+			var users = $(".user");
+			var widthAtual = users.outerWidth();
+			$(".user").outerWidth(widthAtual).outerHeight(widthAtual);
+	  });
+	  
+	$("#aumentar").click(function(){
+		var widthAtual = $(".user").outerWidth();
+		$(".user").outerWidth(widthAtual + 10).outerHeight(widthAtual + 10);
+		//$(".user").outerHeight(widthAtual + 25);
+	});
+	
+	$("#diminuir").click(function(){
+		var widthAtual = $(".user").outerWidth();
+		$(".user").outerWidth(widthAtual - 10).outerHeight(widthAtual - 10);
+		//$(".user").outerHeight(widthAtual - 25);
+		
+		//$(".user").css('width', widthAtual - 25);
+		//$(".user").css('height', widthAtual - 25);
+	});
+	
+	
+	$("#toggle").click(function(){
+			$("#canvasContainer").toggle(700);
+	});
+	  
+	$("#novaPergunta").click(function(){
+		/*id_pergunta++;
+		numeroRespostas=0;
+		respostas = {};
+		console.log('id_pergunta: ' + id_pergunta);
+		console.log('numeroRespostas: ' + numeroRespostas);*/
+		socket.emit('nova pergunta'); // {'id_pergunta': id_pergunta});
+		console.log("Emitiu 'nova pergunta'");
+		//Limpa grafico?
+	});
+	
+	$("#buttonStatusRespostas").click(function(){
+		/*id_pergunta++;
+		numeroRespostas=0;
+		respostas = {};
+		console.log('id_pergunta: ' + id_pergunta);
+		console.log('numeroRespostas: ' + numeroRespostas);*/
+		socket.emit('status respostas');
+		console.log("Emitiu 'status respostas");
+		//Limpa grafico?
+	});
+	
+	$("#iniciaClicker").click(function(){
+	
+		socket.emit('iniciaClicker');
+		console.log("Emitiu iniciaClicker.");
+		
+	});
+	
+	$("#buttonSalvarExportar").click(function(){
+		var d = new Date();
+		var dataString = d.getDate() + "-" + d.getMonth() + "-" + d.getFullYear() + "_" + d.getHours() + "h" + d.getMinutes() + "m";
+		
+		socket.emit('salvar e exportar', {"date": dataString});
+		console.log("Emitiu 'salvar e exportar'");
+
+		
+	});
+	
+	
+	
+	
+	  
+	  
+	  
+	$(document).ready(function(){
+		var grafico = document.getElementById("graficoCanvas");
+		var ctx = grafico.getContext("2d");
+		
+		console.log("document ready");
+		
+		//Calcula o centro em X e Y e o raio como 90% das dimensões
+		var centerX = Math.floor(grafico.width / 2);
+		var centerY = Math.floor((grafico.height-40)/ 2); //Reserva 40 pixels de baixo para legenda
+		var radius = Math.floor(0.9*grafico.width/ 2);
+		
+		//Desenha um círculo preto (borda do gráfico)
+		ctx.beginPath();
+		ctx.moveTo(centerX, centerY);
+		ctx.arc(centerX, centerY, (radius+1), 0, 2*Math.PI, false);
+		ctx.closePath();
+		ctx.fillStyle = "black";
+		ctx.fill();
+		
+		limpaGraficoPizza(grafico, ctx, centerX, centerY, radius);
+
+		desenhaLegenda(grafico, ctx, 0, 'A');
+		desenhaLegenda(grafico, ctx, 1, 'B');
+		desenhaLegenda(grafico, ctx, 2, 'C');
+		desenhaLegenda(grafico, ctx, 3, 'D');
+		desenhaLegenda(grafico, ctx, 4, 'E');
+		
+	});
+	</script>
+  </body>
+</html>

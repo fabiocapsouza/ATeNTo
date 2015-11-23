@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+	<meta charset="ISO-8859-1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Clicker</title>
+
+	<link rel="stylesheet" href="/public/css/stylesheet.css">
+	<style>
+	
+	body {
+		background-color: #245c8a;  
+	}
+	
+	#statusContainer {
+		background-color: #444444;
+		background: linear-gradient(to bottom, #62656d 0%,#45484d 100%);
+		border: #333333 1px solid;
+		margin: 5px 8px;
+		padding-bottom: 5px;
+		border-radius: 5px;
+		box-shadow: rgba(0,0,0,0.7) 0px 0px 10px;
+	}
+	
+	#clickerContainer {
+		background-color: #EEEEEE;
+		border: #333333 1px solid;
+		border-top: 0px;
+		margin: 10px 8px;
+		border-radius: 5px;
+		box-shadow: rgba(0,0,0,0.7) 0px 0px 5px;
+		
+	}
+
+	
+	
+	</style>
+	
+	<script>
+		var respostas = {};
+		var numeroRespostas = 0;
+		var contagem = {};
+		
+		contagem['a'] = 0;
+		contagem['b'] = 0;
+		contagem['c'] = 0;
+		contagem['d'] = 0;
+		contagem['e'] = 0;
+		
+		function calcula() {
+			var i = 0;
+			contagem['a'] = 0;
+			contagem['b'] = 0;
+			contagem['c'] = 0;
+			contagem['d'] = 0;
+			contagem['e'] = 0;
+			var porcentagem = 0; 
+			
+			console.log('entrou na calcula');
+			for(i=0; i<numeroRespostas; i++){
+				contagem[respostas[i]]++;
+			}
+			
+			
+			for(var x in contagem) {
+				console.log(x + "'s: "+ contagem[x])
+				porcentagem = contagem[x]/numeroRespostas*100;
+				$("#quant_"+x).text(porcentagem.toFixed(2) + '% ('+ contagem[x] +' escolhas)');
+			}
+			$("#total").text(numeroRespostas);
+		}
+	  
+	</script>
+  </head>
+  <body>
+	<!--<div class="container" align="center">-->
+	<div class="container" style="text-align: center;">
+		<div id="statusContainer" style="padding-top: 10px">
+			<div class="status">
+				<div id="circuloSocket"></div><span id="statusSocket">Desconectado.</span>
+			</div>
+			<div class="status">
+				<div id="circuloClicker"></div><span id="statusClicker">Sessão não iniciada.</span>
+			</div>
+		</div>
+	
+		<div id="clickerContainer">
+	
+			<div style="padding: 10px 0px;">
+				<div class="user" style="float: none; box-shadow: rgba(0,0,0,0.7) 0px 0px 10px;">
+					<div class="user-info"></div>
+				</div>
+			</div>
+			
+			<div id="buttonsContainer">
+				<button id="button_a" type="button" class="multichoice" onclick="sendAns('a')" disabled>A</button>
+				<button id="button_b" type="button" class="multichoice" onclick="sendAns('b')" disabled>B</button>
+				<button id="button_c" type="button" class="multichoice" onclick="sendAns('c')" disabled>C</button>
+				<button id="button_d" type="button" class="multichoice" onclick="sendAns('d')" disabled>D</button>
+				<button id="button_e" type="button" class="multichoice" onclick="sendAns('e')" disabled>E</button>
+			</div>
+			
+			<div id="textAreaContainer" style="display: none">
+				<textarea name="textArea" rows="5" cols="35" placeholder="Digite sua resposta" disabled></textarea><br>
+				<button id="enviaTextArea" disabled>Enviar</button>
+			</div>
+		</div>
+		
+		
+	</div>
+	
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+	<script>
+		
+		//Se conecta com o servidor WebSockets
+		var socket = io();
+		var respondeuUltimaPergunta = false;
+	  
+		//Função sendAns: envia uma resposta de múltipla escolha.
+		function sendAns(choice) {
+
+			if(choice==='a' || choice==='b' || choice==='c' || choice==='d' || choice==='e') {
+				socket.emit('resposta', choice);
+				console.log('Resposta => ' + choice);
+					
+			}
+		}
+		 
+		 //Função que habilita os objetos de envio de resposta desejados na tela do aluno, de acordo com a resposta.
+		 
+		function habilitaEnvio(opcao) {
+			
+			if(opcao === "alternativas") {
+				//Habilita os botões de múltipla escolha
+				$('.multichoice').removeAttr('disabled').css('opacity', '1');
+			} else if (opcao == "texto") {
+				//Habilita o campo de escrita e o botão de envio
+				$("#textAreaContainer").show();
+				$("textarea").removeAttr("disabled").css("opacity", "1");
+				$("#enviaTextArea").removeAttr("disabled").css("opacity", "1");			
+			}
+		
+		}
+
+	
+		socket.on('connect', function(data){
+			$("#statusSocket").text("Conectado.");
+			$("#circuloSocket").css("background-color", "green");
+			$("#circuloClicker").css("background-color", "black");
+			$("#clickerContainer").show();
+			$("#buttonsContainer").show();
+		});
+		
+		socket.on('disconnect', function(data){
+			$("#statusSocket").text("Desconectado.");
+			$("#circuloSocket").css("background-color", "red");
+			$("#circuloClicker").hide(1000);
+			$("#statusClicker").hide(1000);
+			$("#clickerContainer").hide(1000);
+		});
+		
+		socket.on('error', function(data){
+			$("#statusSocket").text(data);
+			$("#circuloSocket").css("background-color", "red");
+			$("#clickerContainer").hide(1000);
+		});
+		
+		socket.on('info aluno', function (data){
+			
+			if(typeof data!= "undefined"){
+				$(".user").css('background', 'url(' + data.fotoUrl +')');
+				$(".user").css('background-size', 'cover');
+				$(".user-info").text((data.nome.split(" "))[0]);
+			}
+		
+		});
+		
+		socket.on('info clicker', function(data){
+		
+			if(data["clicker iniciado"]) {
+			
+				if(data["iniciou perguntas"]) { //Se já começou, iniciou perguntas > 0
+					if(data["aguardando resposta"]) {
+					
+						if(!data["pergunta finalizada"]) {
+							habilitaEnvio("alternativas");
+							$("#statusClicker").text("Pergunta ativa.");
+							$("#circuloClicker").css("background-color", "blue");
+						} else {
+							$("#statusClicker").text("Pergunta finalizada.");
+							$("#circuloClicker").css("background-color", "red");
+						
+						}
+						
+					} else { //Aluno já respondeu essa pergunta => mostra resposta no status
+					
+						var ultimaResposta = "" + data["ultima resposta"];
+						$("#statusClicker").text("Resposta enviada: " + ultimaResposta.toUpperCase());
+						$("#circuloClicker").css("background-color", "green");
+						
+						//respondeuUltimaPergunta = true;
+					}
+					
+				} else { //não iniciaram as perguntas ainda
+				
+					$("#statusClicker").text("Sessão iniciada.");
+					$("#circuloClicker").css("background-color", "yellow");
+				
+				}
+			}	
+		
+			/*if(data["clicker iniciado"]) {
+				$("#statusClicker").text("Sessão iniciada.");
+				$("#circuloClicker").css("background-color", "yellow");
+			
+				if(data["aguardando resposta"]) {
+				
+					if(!data["pergunta finalizada"]) {
+						habilitaEnvio("alternativas");
+						$("#statusClicker").text("Pergunta ativa.");
+						$("#circuloClicker").css("background-color", "blue");
+					} else {
+						$("#statusClicker").text("Pergunta finalizada.");
+						$("#circuloClicker").css("background-color", "red");
+					
+					}
+					
+				} else {
+				
+					var ultimaResposta = "" + data["ultima resposta"];
+					$("#statusClicker").text("Resposta enviada: " + ultimaResposta.toUpperCase());
+					$("#circuloClicker").css("background-color", "green");
+					
+					//respondeuUltimaPergunta = true;
+				}
+			}*/
+		});
+		
+		socket.on('nova pergunta ativa', function(data){
+			
+			$("#statusClicker").text("Pergunta ativa.");
+			$("#circuloClicker").css("background-color", "blue");
+			//$(".multichoice").removeAttr("disabled").css("opacity", "1");
+			habilitaEnvio("alternativas");
+			
+			//respondeuUltimaPergunta = false;
+			
+			if(data["alternativa"]) {
+			
+				$(".multichoice").removeAttr("disabled").css("opacity", "1");
+				
+			} else if(data["texto"]) {
+				$("textarea").removeAttr("disabled");
+				$("#enviaTextArea").removeAttr("disabled");
+			}
+		});
+
+
+		socket.on('ackResposta', function(data){
+			$(".multichoice").attr("disabled", "disabled").css("opacity", "0.5");
+			
+			if(data["alternativa"]) {
+				$("#statusClicker").text("Resposta enviada: " + (data["alternativa"]).toUpperCase());
+			} else if(data["texto"]) {
+				$("#statusClicker").text("Resposta de texto enviada.");
+			}
+			$("#circuloClicker").css("background-color", "green");
+			
+			//respondeuUltimaPergunta = true;
+		});
+		
+		socket.on('checaAlunosOnline', function(data){
+			socket.emit('alunoOnlineAck');
+		});
+		
+		socket.on('clicker iniciado', function(){
+			
+			$("#statusClicker").text("Sessão iniciada.");
+			$("#circuloClicker").css("background-color", "yellow");
+			
+		});
+		
+		socket.on('pergunta finalizada', function(data){
+		
+		
+			var textoStatusClicker = $("#statusClicker").text();
+			
+			//Checa se o aluno respondeu a pergunta atual (Status será 'Resposta enviada: x')
+			if (textoStatusClicker.indexOf('Resposta enviada') == -1) { //indexOf retorna -1 se não encontrar a substring na string, caso contrário retorna a posição da substring
+				//Não respondeu => substitui 'Pergunta ativa.' por 'Pergunta finalizada.'
+				$("#statusClicker").text("Pergunta finalizada.");
+				$("#circuloClicker").css("background-color", "red");
+			
+			} //Se aluno respondeu, não altera o status, deixando o feedback da resposta enviada por ele.
+			
+			
+			$(".multichoice").attr("disabled", "disabled").css("opacity", "0.5");
+			
+			
+		});
+		
+
+		
+		$(function(){
+			$(".multichoice").css("opacity", "0.5");
+			//$(".multichoice").removeAttr("disabled");
+			//habilitaEnvio("alternativas");
+			//habilitaEnvio("texto");
+		});
+	  
+	  
+	  
+	</script>
+  </body>
+</html>
