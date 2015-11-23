@@ -223,7 +223,7 @@ app.get('/aluno', verificaSessao, function(req, res){
 	if(req.session.ra && req.session.turma && req.session.nome){
 		
 	//"Rotina" para páginas personalizadas: lê arquivo .html, compila com Handlebars e utiliza o Contexto desejado (com dados do aluno).
-		fs.readFile(__dirname + 'aluno.html', 'utf-8', function (err, dadosArquivo){
+		fs.readFile(__dirname + '/aluno.html', 'utf-8', function (err, dadosArquivo){
 			if(err) {
 				console.log('Erro: ' + err);
 				res.send("Falha ao acessar/compilar o template.");
