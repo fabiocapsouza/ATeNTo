@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="icon" type="image/x-icon" href="public/favicon.ico" />
-    <title>WebClicker - Menu do Aluno</title>
+    <title>ATeNTo - Menu do Aluno</title>
     <style>
 	* { margin: 0; padding: 0; box-sizing: border-box; }
 	
@@ -105,7 +105,7 @@
   </head>
   <body>
 	<div id="container" align="center">
-		<h1>WebClicker - Menu do aluno</h1>
+		<h1>Menu do Aluno</h1>
 		<p>Conectado como:</p>
 		<div class="user">
 			<div class="user-info">
@@ -114,7 +114,7 @@
 			</div>
 		</div>
 		<br>
-		<a href="/clicker">Acessar o WebClicker</a>
+		<a href="/clicker">Acessar a Interface do Aluno</a>
 		<a id="linkFoto" href="#">Alterar foto</a>
 		<div id="formContainer">
 			<form method="post" enctype="multipart/form-data" action="/file-upload">
@@ -131,7 +131,6 @@
 	<script src="../public/js/jquery-1.11.3.min.js"></script>
 	<script>
 		
-		//Botão de alterar foto
 		$("#linkFoto").click(function(event){
 			event.preventDefault();
 			$("#formContainer").toggle(500);
